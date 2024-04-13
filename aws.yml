@@ -1,6 +1,6 @@
 ---
 - hosts: webservers
-  become: true
+  # become: true
   vars:
     container_count: 1
     default_container_name: web-server
@@ -51,7 +51,7 @@
       remote_user: ubuntu
       user:
         name: "ubuntu"
-        group: "docker"
+        groups: "docker"
         append: yes
       tags:
         - docker
@@ -60,16 +60,18 @@
       copy:
         src: assets
         dest: .
-        # recursive: yes
 
     - name: Build Docker image
-      docker_image:
+      community.docker.docker_image:
+        build:
+          path: ./assets
         name: myappimage:1
-        path: assets/Dockerfile
-        tag: latest
+        source: build
 
     - name: Run the Docker container
       docker_container:
         name: myappcontainer
         image: myappimage:1
-        state: started 
+        state: started
+        ports:
+          - 80:80

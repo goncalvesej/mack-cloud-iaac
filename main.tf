@@ -4,6 +4,17 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.27"
     }
+
+    ansible = {
+      version = "~> 1.2.0"
+      source  = "ansible/ansible"
+    }
+  }
+
+  backend "s3" {
+    bucket = "goncalvesej-tf-state"
+    key    = "websrv"
+    region = "us-east-1"
   }
 
   required_version = ">= 0.14.9"
@@ -20,7 +31,7 @@ resource "aws_instance" "app_server" {
   key_name = var.ssh_settings.name
 
   vpc_security_group_ids = [
-    "sg_srv01"
+    aws_security_group.sg_srv01.id
   ] 
 }
 
@@ -51,6 +62,18 @@ resource "aws_security_group" "sg_srv01" {
   }
 }
 
-output "srv01_public_ip" {
-  value = aws_instance.app_server.public_ip
+resource "local_file" "inventory" {
+  content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.user, host_ip_addr = aws_instance.app_server.public_ip })
+  filename = "${path.module}/hosts.yml"
+}
+
+resource "ansible_playbook" "playbook" {
+  playbook   = "aws.yml"
+  name       = "host"
+  replayable = true
+
+  extra_vars = {
+    inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
+    private-key = file(var.ssh_settings.path)
+  }
 }
