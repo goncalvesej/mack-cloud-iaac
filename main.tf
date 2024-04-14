@@ -35,7 +35,7 @@ resource "github_actions_secret" "srvSSHKey" {
 
 resource "aws_key_pair" "srvSSHKey" {
     key_name = var.ssh_settings.name
-    public_key = srvSSHKey
+    public_key = github_actions_secret.srvSSHKey
 }
 
 # EC2
