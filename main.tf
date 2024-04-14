@@ -14,9 +14,9 @@ terraform {
   }
 
   backend "s3" {
-    bucket = var.s3_settings.bucket_name
-    key    = var.s3_settings.key
-    region = var.aws_region
+    bucket = "goncalvesej-tf-state"
+    key    = "websrv"
+    region = "us-east-1"
   }
 
   required_version = ">= 0.14.9"
