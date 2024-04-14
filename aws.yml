@@ -56,22 +56,22 @@
       tags:
         - docker
 
-    - name: Copy assets
+    - name: Copy app assets
       copy:
-        src: assets
+        src: app
         dest: .
 
     - name: Build Docker image
       community.docker.docker_image:
         build:
-          path: ./assets
+          path: ./app
         name: myappimage:1
         source: build
 
     - name: Run the Docker container
       docker_container:
-        name: myappcontainer
-        image: myappimage:1
+        name: MySuperWebApp
+        image: mysuperwebappimage:1
         state: started
         ports:
           - 80:80

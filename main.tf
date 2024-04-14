@@ -1,3 +1,5 @@
+# Setup
+
 terraform {
   required_providers {
     aws = {
@@ -12,37 +14,35 @@ terraform {
   }
 
   backend "s3" {
-    bucket = "goncalvesej-tf-state"
-    key    = "websrv"
-    region = "us-east-1"
+    bucket = var.s3_settings.bucket_name
+    key    = var.s3_settings.key
+    region = var.aws_region
   }
 
   required_version = ">= 0.14.9"
 }
 
 provider "aws" {
-  profile = var.aws_settings.profile
-  region  = var.aws_settings.region
+  region  = var.aws_region
 }
 
-resource "aws_instance" "app_server" {
-  ami           = var.ec2_settings.ami
-  instance_type = var.ec2_settings.instance_type
-  key_name = var.ssh_settings.name
+# SSH
 
-  vpc_security_group_ids = [
-    aws_security_group.sg_srv01.id
-  ] 
+resource "github_actions_secret" "srvSSHKey" {
+  repository       = var.github_settings.repository
+  secret_name      = var.github_settings.secret_name
 }
 
-resource "aws_key_pair" "srv01SSHKey" {
+resource "aws_key_pair" "srvSSHKey" {
     key_name = var.ssh_settings.name
-    public_key = file(var.ssh_settings.path)
+    public_key = srvSSHKey
 }
 
-resource "aws_security_group" "sg_srv01" {
-  name = "sg_srv01"
-  description = "Web server security group"
+# EC2
+
+resource "aws_security_group" "sg_web_srv" {
+  name = "sg_web_srv"
+  description = "security group for web server"
   ingress{
       cidr_blocks = [ "0.0.0.0/0" ]
       ipv6_cidr_blocks = [ "::/0" ]
@@ -57,23 +57,32 @@ resource "aws_security_group" "sg_srv01" {
       to_port = 0
       protocol = "-1"
   }
-  tags = {
-    Name = "sg_srv01"
-  }
 }
 
-resource "local_file" "inventory" {
-  content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.user, host_ip_addr = aws_instance.app_server.public_ip })
-  filename = "${path.module}/hosts.yml"
+resource "aws_instance" "app_server" {
+  ami           = var.ec2_settings.ami
+  instance_type = var.ec2_settings.instance_type
+  key_name = var.ssh_settings.name
+
+  vpc_security_group_ids = [
+    aws_security_group.sg_web_srv.id
+  ] 
 }
 
-resource "ansible_playbook" "playbook" {
-  playbook   = "aws.yml"
-  name       = "host"
-  replayable = true
+# Ansible
 
-  extra_vars = {
-    inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
-    private-key = file(var.ssh_settings.path)
-  }
-}
+# resource "local_file" "inventory" {
+#   content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.user, host_ip_addr = aws_instance.app_server.public_ip })
+#   filename = "${path.module}/hosts.yml"
+# }
+
+# resource "ansible_playbook" "playbook" {
+#   playbook   = "aws.yml"
+#   name       = "host"
+#   replayable = true
+
+#   extra_vars = {
+#     inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
+#     private-key = file(var.ssh_settings.path)
+#   }
+# }

@@ -1,9 +1,15 @@
 # AWS
 
-variable "aws_settings" {
+variable "aws_region" {
+  type = string
+}
+
+# Github
+
+variable "github_settings" {
   type = object({
-    profile = string
-    region = string
+    repository = string
+    secret_name = string
   })
 }
 
@@ -16,11 +22,19 @@ variable "ec2_settings" {
   })
 }
 
+# S3
+
+variable "s3_settings" {
+  type = object({
+    bucket_name = string
+    key = string
+  })
+}
+
 # SSH
 
 variable "ssh_settings" {
   type = object({
-    path = string
     name = string
     user = string
   })
