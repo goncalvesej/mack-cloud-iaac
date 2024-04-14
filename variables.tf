@@ -35,7 +35,11 @@ variable "s3_settings" {
 
 variable "ssh_settings" {
   type = object({
-    name = string
-    user = string
+    username = string
+    key_name = string
   })
+}
+
+variable "ssh_key" {
+  type = string
 }

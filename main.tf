@@ -28,14 +28,9 @@ provider "aws" {
 
 # SSH
 
-resource "github_actions_secret" "srvSSHKey" {
-  repository       = var.github_settings.repository
-  secret_name      = var.github_settings.ssh_secret_name
-}
-
 resource "aws_key_pair" "srvSSHKey" {
-    key_name = var.ssh_settings.name
-    public_key = github_actions_secret.srvSSHKey
+    key_name = var.ssh_settings.key_name
+    public_key = var.ssh_key
 }
 
 # EC2
@@ -62,7 +57,7 @@ resource "aws_security_group" "sg_web_srv" {
 resource "aws_instance" "app_server" {
   ami           = var.ec2_settings.ami
   instance_type = var.ec2_settings.instance_type
-  key_name = var.ssh_settings.name
+  key_name = var.ssh_settings.key_name
 
   vpc_security_group_ids = [
     aws_security_group.sg_web_srv.id

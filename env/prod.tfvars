@@ -16,6 +16,6 @@ s3_settings = {
 }
 
 ssh_settings = {
-  name = "srvKey"
-  user = "ubuntu"
+  username = "ubuntu"
+  key_name = "webSrvKey"
 }
