@@ -30,7 +30,7 @@ provider "aws" {
 
 resource "github_actions_secret" "srvSSHKey" {
   repository       = var.github_settings.repository
-  secret_name      = var.github_settings.secret_name
+  secret_name      = var.github_settings.ssh_secret_name
 }
 
 resource "aws_key_pair" "srvSSHKey" {

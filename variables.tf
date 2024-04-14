@@ -9,7 +9,7 @@ variable "aws_region" {
 variable "github_settings" {
   type = object({
     repository = string
-    secret_name = string
+    ssh_secret_name = string
   })
 }
 
