@@ -38,7 +38,6 @@ jobs:
         AWS_DEFAULT_REGION: 'us-east-1'
 
     - name: Terraform Apply
-      if: github.ref == 'refs/heads/"main"' && github.event_name == 'push'
       uses: hashicorp/terraform-github-actions@master
       with:
         tf_actions_version: 1.7.4
