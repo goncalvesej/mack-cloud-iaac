@@ -73,12 +73,12 @@ resource "local_file" "inventory" {
 
 resource "ansible_playbook" "playbook" {
   playbook   = "aws.yml"
-  name       = "host"
+  name       = "webservers"
   replayable = true
 
   extra_vars = {
-    # inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
-    inventory = "./hosts.yml"
+    inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
+    # inventory = "./hosts.yml"
     private-key = var.ssh_key
   }
 }
