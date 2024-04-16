@@ -66,18 +66,23 @@ resource "aws_instance" "app_server" {
 
 # Ansible
 
-# resource "local_file" "inventory" {
-#   content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.user, host_ip_addr = aws_instance.app_server.public_ip })
-#   filename = "${path.module}/hosts.yml"
-# }
+resource "local_file" "inventory" {
+  content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.user, host_ip_addr = aws_instance.app_server.public_ip })
+  filename = "${path.module}/hosts.yml"
+}
 
-# resource "ansible_playbook" "playbook" {
-#   playbook   = "aws.yml"
-#   name       = "host"
-#   replayable = true
+resource "ansible_playbook" "playbook" {
+  playbook   = "aws.yml"
+  name       = "host"
+  replayable = true
 
-#   extra_vars = {
-#     inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
-#     private-key = file(var.ssh_settings.path)
-#   }
-# }
+  extra_vars = {
+    # inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
+    inventory = "./hosts.yml"
+    private-key = file(var.ssh_settings.path)
+  }
+}
+
+output "webserver_address" {
+  value = aws_instance.app_server.public_ip
+}
