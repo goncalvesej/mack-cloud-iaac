@@ -67,7 +67,7 @@ resource "aws_instance" "app_server" {
 # Ansible
 
 resource "local_file" "inventory" {
-  content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.user, host_ip_addr = aws_instance.app_server.public_ip })
+  content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.username, host_ip_addr = aws_instance.app_server.public_ip })
   filename = "${path.module}/hosts.yml"
 }
 
@@ -79,7 +79,7 @@ resource "ansible_playbook" "playbook" {
   extra_vars = {
     # inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
     inventory = "./hosts.yml"
-    private-key = file(var.ssh_settings.path)
+    private-key = var.ssh_key
   }
 }
 
