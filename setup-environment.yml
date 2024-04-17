@@ -65,7 +65,7 @@
       community.docker.docker_image:
         build:
           path: ./app
-        name: myappimage:1
+        name: mysuperwebappimage:1
         source: build
 
     - name: Run the Docker container

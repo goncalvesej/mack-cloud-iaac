@@ -6,11 +6,6 @@ terraform {
       source  = "hashicorp/aws"
       version = "~> 3.27"
     }
-
-    ansible = {
-      version = "~> 1.2.0"
-      source  = "ansible/ansible"
-    }
   }
 
   backend "s3" {
@@ -64,25 +59,11 @@ resource "aws_instance" "app_server" {
   ] 
 }
 
-# Ansible
-
 resource "local_file" "inventory" {
   content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.username, host_ip_addr = aws_instance.app_server.public_ip })
   filename = "${path.module}/hosts.yml"
 }
 
-resource "ansible_playbook" "playbook" {
-  playbook   = "aws.yml"
-  name       = "webservers"
-  replayable = true
-
-  extra_vars = {
-    inventory = "{'webservers': ['${aws_instance.app_server.public_ip}']}"
-    # inventory = "./hosts.yml"
-    private-key = var.ssh_key
-  }
-}
-
-output "webserver_address" {
-  value = aws_instance.app_server.public_ip
+output "app_url" {
+  value = "http://${aws_instance.app_server.public_ip}"
 }
