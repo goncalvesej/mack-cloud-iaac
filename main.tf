@@ -59,11 +59,11 @@ resource "aws_instance" "app_server" {
   ] 
 }
 
-resource "local_file" "inventory" {
-  content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.username, host_ip_addr = aws_instance.app_server.public_ip })
-  filename = "${path.module}/hosts.yml"
-}
+# resource "local_file" "inventory" {
+#   content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.username, host_ip_addr = aws_instance.app_server.public_ip })
+#   filename = "${path.module}/hosts.yml"
+# }
 
-output "app_url" {
-  value = "http://${aws_instance.app_server.public_ip}"
+output "webserver_url" {
+  value = aws_instance.app_server.public_ip
 }

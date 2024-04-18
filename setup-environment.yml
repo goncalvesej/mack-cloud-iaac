@@ -1,12 +1,12 @@
 ---
-- hosts: webservers
-  # become: true
+- hosts: all
+  become: true
   vars:
     container_count: 1
     default_container_name: web-server
     default_container_image: nginx
     default_container_command: sleep 1d
-
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
     - name: Install aptitude
       apt:
