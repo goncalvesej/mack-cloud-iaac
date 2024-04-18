@@ -8,53 +8,21 @@
     default_container_command: sleep 1d
     ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
   tasks:
-    - name: Install aptitude
-      apt:
-        name: aptitude
+    - name: Update repo cache
+      yum:
+        name: '*'
         state: latest
-        update_cache: true
 
-    - name: Install required system packages
-      apt:
-        pkg:
-          - apt-transport-https
-          - ca-certificates
-          - curl
-          - software-properties-common
-          - python3-pip
-          - virtualenv
-          - python3-setuptools
-        state: latest
-        update_cache: true
+    - name: Install dependencies
+      yum:
+        name:
+          - docker
 
-    - name: Add Docker GPG apt Key
-      apt_key:
-        url: https://download.docker.com/linux/ubuntu/gpg
-        state: present
-
-    - name: Add Docker Repository
-      apt_repository:
-        repo: deb https://download.docker.com/linux/ubuntu focal stable
-        state: present
-
-    - name: Update apt and install docker-ce
-      apt:
-        name: docker-ce
-        state: latest
-        update_cache: true
-
-    - name: Install Docker Module for Python
-      pip:
+    - name: Start and enable Docker
+      service:
         name: docker
-
-    - name: Add "ansible_ubuntu_demo" user to "docker" group
-      remote_user: ubuntu
-      user:
-        name: "ubuntu"
-        groups: "docker"
-        append: yes
-      tags:
-        - docker
+        state: started
+        enabled: yes
 
     - name: Copy app assets
       copy:
@@ -65,13 +33,13 @@
       community.docker.docker_image:
         build:
           path: ./app
-        name: mysuperwebappimage:1
+        name: mysuperwebappimage
         source: build
 
     - name: Run the Docker container
       docker_container:
         name: MySuperWebApp
-        image: mysuperwebappimage:1
+        image: mysuperwebappimage
         state: started
         ports:
           - 80:80

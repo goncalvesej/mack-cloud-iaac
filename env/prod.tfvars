@@ -6,7 +6,7 @@ github_settings = {
 }
 
 ec2_settings = {
-  ami = "ami-080e1f13689e07408"
+  ami = "ami-04e5276ebb8451442"
   instance_type = "t2.micro"
 }
 
@@ -15,7 +15,4 @@ s3_settings = {
   key = "websrv"
 }
 
-ssh_settings = {
-  username = "ubuntu"
-  key_name = "webSrvKey"
-}
+ssh_key_name = "webSrvKey"

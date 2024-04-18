@@ -24,8 +24,8 @@ provider "aws" {
 # SSH
 
 resource "aws_key_pair" "srvSSHKey" {
-    key_name = var.ssh_settings.key_name
-    public_key = var.ssh_key
+    key_name = var.ssh_key_name
+    public_key = var.ssh_public_key
 }
 
 # EC2
@@ -36,8 +36,8 @@ resource "aws_security_group" "sg_web_srv" {
   ingress{
       cidr_blocks = [ "0.0.0.0/0" ]
       ipv6_cidr_blocks = [ "::/0" ]
-      from_port = 0
-      to_port = 0
+      from_port = 80
+      to_port = 80
       protocol = "-1"
   }
   egress{
@@ -52,17 +52,12 @@ resource "aws_security_group" "sg_web_srv" {
 resource "aws_instance" "app_server" {
   ami           = var.ec2_settings.ami
   instance_type = var.ec2_settings.instance_type
-  key_name = var.ssh_settings.key_name
+  key_name = var.ssh_key_name
 
   vpc_security_group_ids = [
     aws_security_group.sg_web_srv.id
   ] 
 }
-
-# resource "local_file" "inventory" {
-#   content = templatefile("./inventory.tftpl", { host_ssh_user = var.ssh_settings.username, host_ip_addr = aws_instance.app_server.public_ip })
-#   filename = "${path.module}/hosts.yml"
-# }
 
 output "webserver_url" {
   value = aws_instance.app_server.public_ip
