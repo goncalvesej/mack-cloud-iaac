@@ -38,7 +38,7 @@ resource "aws_security_group" "sg_web_srv" {
       ipv6_cidr_blocks = [ "::/0" ]
       from_port = 80
       to_port = 80
-      protocol = "-1"
+      protocol = "TCP"
   }
   egress{
       cidr_blocks = [ "0.0.0.0/0" ]
@@ -49,13 +49,33 @@ resource "aws_security_group" "sg_web_srv" {
   }
 }
 
+resource "aws_security_group" "sg_ssh" {
+  name = "sg_ssh"
+  description = "security group for web server"
+  ingress{
+      cidr_blocks = [ "0.0.0.0/0" ]
+      ipv6_cidr_blocks = [ "::/0" ]
+      from_port = 22
+      to_port = 22
+      protocol = "TCP"
+  }
+  # egress{
+  #     cidr_blocks = [ "0.0.0.0/0" ]
+  #     ipv6_cidr_blocks = [ "::/0" ]
+  #     from_port = 0
+  #     to_port = 0
+  #     protocol = "-1"
+  # }
+}
+
 resource "aws_instance" "app_server" {
   ami           = var.ec2_settings.ami
   instance_type = var.ec2_settings.instance_type
   key_name = var.ssh_key_name
 
   vpc_security_group_ids = [
-    aws_security_group.sg_web_srv.id
+    aws_security_group.sg_web_srv.id,
+    aws_security_group.sg_ssh.id,
   ] 
 }
 
