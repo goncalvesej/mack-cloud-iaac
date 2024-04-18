@@ -15,4 +15,7 @@ s3_settings = {
   key = "websrv"
 }
 
-ssh_key_name = "webSrvKey"
+ssh_settings = {
+  public_key_name = "webSrvKey"
+  username = "ec2-user"
+}

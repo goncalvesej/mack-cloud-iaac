@@ -33,7 +33,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_DEFAULT_REGION: 'us-east-1'
-        TF_VAR_ssh_public_key: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
+        TF_VAR_ssh_public_key_file: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
 
     - name: Terraform Plan
       run: terraform plan -var-file="./env/prod.tfvars"
@@ -41,7 +41,7 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_DEFAULT_REGION: 'us-east-1'
-        TF_VAR_ssh_public_key: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
+        TF_VAR_ssh_public_key_file: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
 
     - name: Terraform Apply
       id: tf_apply
@@ -50,19 +50,27 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_DEFAULT_REGION: 'us-east-1'
-        TF_VAR_ssh_public_key: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
+        TF_VAR_ssh_public_key_file: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
     
-    - name: Set Terraform Output
-      id: tf_output
+    - name: Set webserver_url Terraform Output
+      id: tf_webserver_url_output
       run: echo "webserver_url=$(terraform output webserver_url)" >> $GITHUB_OUTPUT
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_DEFAULT_REGION: 'us-east-1'
-        TF_VAR_ssh_public_key: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
+    
+    - name: Set ssh_username Terraform Output
+      id: tf_ssh_username_output
+      run: echo "ssh_username=$(terraform output ssh_username)" >> $GITHUB_OUTPUT
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
+        AWS_DEFAULT_REGION: 'us-east-1'
     
     outputs:
-      webserver_url: ${{ steps.tf_output.outputs.webserver_url }}
+      webserver_url: ${{ steps.tf_webserver_url_output.outputs.webserver_url }}
+      ssh_username: ${{ steps.tf_ssh_username_output.outputs.ssh_username }}
 
 
   ansible:
@@ -84,7 +92,7 @@ jobs:
     
     - name: Run playbook
       run: |
-        ansible-playbook --inventory ${{needs.terraform.outputs.webserver_url}}, --private-key "./key.pem" --user ubuntu setup-environment.yml
+        ansible-playbook --inventory ${{needs.terraform.outputs.webserver_url}}, --private-key "./key.pem" --user ${{needs.terraform.outputs.ssh_username}} setup-environment.yml
 
     - name: App URL
       run: |
