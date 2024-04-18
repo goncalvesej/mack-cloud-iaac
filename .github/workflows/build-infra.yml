@@ -51,16 +51,6 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
         AWS_DEFAULT_REGION: 'us-east-1'
         TF_VAR_ssh_key: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
-
-    # - name: Call terraform output
-    #   run: |
-    #     output=$(terraform output webserver_url)
-    #     echo $output
-    #   env:
-    #     AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY }}
-    #     AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_KEY }}
-    #     AWS_DEFAULT_REGION: 'us-east-1'
-    #     TF_VAR_ssh_key: ${{ secrets.AWS_PUBLIC_SSH_KEY }}
     
     - name: Set Terraform Output
       id: tf_output
@@ -88,13 +78,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v3
 
-    - name: Print webserver url
+    - name: Set SSH Key
       run: |
-        echo ${{needs.terraform.outputs.webserver_url}}
-
+        echo "${{secrets.AWS_PRIVATE_SSH_KEY}}" > key.pem && chmod 400 key.pem
+    
     - name: Run playbook
       run: |
-        ansible-playbook --inventory ${{needs.terraform.outputs.webserver_url}}, --private-key "${{secrets.AWS_PRIVATE_SSH_KEY}}" --user ubuntu setup-environment.yml
+        ansible-playbook --inventory ${{needs.terraform.outputs.webserver_url}}, --private-key "./key.pem" --user ubuntu setup-environment.yml
 
     - name: App URL
       run: |
