@@ -1,0 +1,17 @@
+---
+- hosts: all
+  become: true
+  vars:
+    ansible_ssh_common_args: '-o StrictHostKeyChecking=no'
+  tasks:
+    - name: Install package
+      yum:
+        name: '{{ package }}'
+        state: latest
+      when: operation == "install"
+    
+    - name: Remove package
+      yum:
+        name: '{{ package }}'
+        state: absent
+      when: operation == "remove"
