@@ -3,15 +3,44 @@ name: 'Deploy to AWS'
 on:
   push:
     branches: [ "main" ]
-  pull_request:
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+        type: choice
+        options:
+          - info
+          - warning
+          - debug
+      print_tags:
+        description: 'True to print to STDOUT'
+        required: true
+        type: boolean
+      tags:
+        description: 'Test scenario tags'
+        required: true
+        type: string
+      environment:
+        description: 'Environment to run tests against'
+        type: environment
+        required: true
 
 permissions:
   contents: read
 
 jobs:
+  print-tags:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print the input tag to STDOUT
+        run: echo  The tags are ${{ inputs.tags }} 
+  
   terraform:
     name: 'Build infra'
     runs-on: ubuntu-latest
+    needs: [print-tags]
 
     defaults:
       run:
